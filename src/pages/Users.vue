@@ -2,13 +2,8 @@
   <section>
     <div class="max-w-screen-mlg mx-auto">
       <h2 class="text-2xl font-bold mb-4 text-gray-800 mt-5 ml-8">User List</h2>
-      <UserDataTable 
-        :data="data" 
-        @register-user="handleRegisterUser" 
-        @update-user="handleUpdateUser"
-        @delete-user="handleDeleteUser"
-        :key="tableKey"
-        />
+      <UserDataTable :data="data" @register-user="handleRegisterUser" @update-user="handleUpdateUser"
+        @delete-user="openModalDecisionDeleteUser" :key="tableKey" />
     </div>
     <Toast />
     <ConfirmDialog group="headless" style="width: 30rem !important;">
@@ -51,6 +46,20 @@
         </div>
       </template>
     </ConfirmDialog>
+    <ConfirmPopup></ConfirmPopup>
+
+    <Dialog v-model:visible="visible" modal header="Delete User" :style="{ width: '25rem' }"
+      :breakpoints="{ '800px': '75vw', '575px': '90vw' }">
+      <p>
+        Do you want to proceed with deleting the user?
+      </p>
+      <div class="flex items-center gap-2 mt-4">
+        <Button label="Delete" @click="handleDeleteUser(true)" class="w-[8rem] p-button-danger p-button-text"
+          severity="danger"></Button>
+        <Button label="Cancel" outlined @click="handleDeleteUser(false)" class="w-[8rem]"></Button>
+      </div>
+    </Dialog>
+
   </section>
 </template>
 
@@ -70,6 +79,7 @@ onMounted(async () => {
 const confirm = useConfirm();
 const toast = useToast();
 
+const visible = ref(false);
 const data = ref<IUser[]>();
 const tableKey = ref(0);
 
@@ -109,7 +119,7 @@ const handleRegisterUser = async () => {
       }
 
       try {
-        const userResponse:any = UserService.registerUserService(newUser);
+        const userResponse: any = UserService.registerUser(newUser);
         console.log('response', userResponse);
         if (userResponse.response === 201) {
           toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Register Successfuly', life: 3000 });
@@ -133,16 +143,47 @@ const handleUpdateUser = (rowData: any) => {
   console.log('Row data:', rowData);
 };
 
-const handleDeleteUser = (rowData: any) => {
-  // Lidar com o evento do botão de ação aqui
-  console.log('delete data:', rowData);
+
+const openModalDecisionDeleteUser = (rowData: any) => {
+  visible.value = true;
+  formData.value = rowData;
+}
+
+const handleDeleteUser = (isDeleteUser: boolean) => {
+  if (!isDeleteUser) {
+    clearFormData();
+    toast.add(
+      {
+        severity: 'error',
+        summary: 'Cancelled',
+        detail: `Operation cancelled`,
+        life: 3000
+      });
+    visible.value = false;
+    return;
+  }
+
+  const deleteUser = UserService.deleteUser(formData.value.id);
+
+  if (deleteUser.response === 200) {
+    toast.add({ 
+      severity: 'success',
+      summary: 'Confirmed',
+      detail: 'Register was Deleted',
+      life: 3000 
+    });
+    clearFormData();
+    getUsers();
+    visible.value = false;
+    tableKey.value += 1;
+  }
+
 };
 
 const getUsers = async () => {
   const response = await UserService.getUsers();
-
   const sortData = response
-  .sort((a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return data.value = sortData;
 };
