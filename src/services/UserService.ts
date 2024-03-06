@@ -3,7 +3,9 @@ export interface IUser {
     name: string;
     document: string;
     password: string;
-    status: 'ACTIVE' | 'INACTIVE';
+    status: string;
+    createdAt: Date;
+    updatedAt: Date | null;
 }
 
 class UserService {
@@ -19,7 +21,6 @@ class UserService {
         try {            
             this.data.push(newUser);
             localStorage.setItem('userData', JSON.stringify(this.data));
-
             return {
                 response: 201,
                 data: newUser

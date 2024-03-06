@@ -77,6 +77,8 @@ const { data } = defineProps({
     data: Array,
 })
 
+console.log("data", data);
+
 const localfilter = {
     "global": { value: null, matchMode: FilterMatchMode.CONTAINS },
     "id": { value: null, matchMode: FilterMatchMode.STARTS_WITH },
