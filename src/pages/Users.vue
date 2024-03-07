@@ -25,6 +25,10 @@
                 <InputText id="name" v-model="formData.name" class="w-full sm:w-80" />
               </div>
               <div class="p-field p-col mb-2">
+                <label for="name" class="block mb-1">Username</label>
+                <InputText id="name" v-model="formData.username" class="w-full sm:w-80" />
+              </div>
+              <div class="p-field p-col mb-2">
                 <label for="document" class="block mb-1">Document</label>
                 <InputText id="document" v-model="formData.document" class="w-full sm:w-80" />
               </div>
@@ -87,6 +91,7 @@ const formData = ref({
   id: '',
   name: '',
   document: '',
+  username: '',
   password: '',
   status: 'ACTIVE',
   statusOptions: [
@@ -112,6 +117,7 @@ const handleRegisterUser = async () => {
         id: uuidv4(),
         name: formData.value.name,
         document: formData.value.document,
+        username: formData.value.username,
         password: formData.value.password,
         status: formData.value.status,
         createdAt: new Date(),
@@ -165,13 +171,13 @@ const handleDeleteUser = (isDeleteUser: boolean) => {
 
   const deleteUser = UserService.deleteUser(formData.value.id);
 
+  toast.add({ 
+    severity: 'success',
+    summary: 'Confirmed',
+    detail: 'Register was Deleted',
+    life: 3000 
+  });
   if (deleteUser.response === 200) {
-    toast.add({ 
-      severity: 'success',
-      summary: 'Confirmed',
-      detail: 'Register was Deleted',
-      life: 3000 
-    });
     clearFormData();
     getUsers();
     visible.value = false;
@@ -194,6 +200,7 @@ const clearFormData = () => {
     name: '',
     document: '',
     password: '',
+    username: '',
     status: 'ACTIVE',
     statusOptions: [
       { label: 'Active', value: 'ACTIVE' },
