@@ -1,49 +1,29 @@
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
+import { moviesData } from '../utils/movies';
 
-interface Movie {
-  id: number;
-  title: string;
-  description: string;
-  imageUrl: string;
+interface IMovie {
+  Id?: string,
+  Title: string,
+  Year: string,
+  Plot: string,
+  Poster: string
 }
 
-export default defineComponent({
-  name: 'Home',
-  setup() {
-    const movies = [
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 3, title: "Cidade de Deus", description: "Um emocionante filme brasileiro sobre a vida nas favelas do Rio de Janeiro.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
-      { id: 1, title: "O Poderoso Chefão", description: "Um clássico filme de máfia dirigido por Francis Ford Coppola.", imageUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg" },
-      { id: 2, title: "Interestelar", description: "Um épico filme de ficção científica dirigido por Christopher Nolan.", imageUrl: "https://via.placeholder.com/300x450" },
- 
-      // Adicione mais filmes conforme necessário
-    ];
+
+    const movies = moviesData;
 
     const selectedMovie = ref(movies[0]);
     const offset = ref(0);
 
-    const showMovieDetails = (movie: Movie) => {
+    const showMovieDetails = (movie: IMovie) => {
       selectedMovie.value = movie;
     };
 
     const prevSlide = () => {
       if (offset.value < 0) {
-        offset.value += 340; // Largura do item do carrossel + margem
+        offset.value += 340;
       }
     };
 
@@ -52,30 +32,20 @@ export default defineComponent({
       if (carousel) {
         const maxOffset = carousel.scrollWidth - carousel.clientWidth;
         if (offset.value > -maxOffset) {
-          offset.value -= 340; // Largura do item do carrossel + margem
+          offset.value -= 340;
         }
       }
     };
 
-    return {
-      movies,
-      selectedMovie,
-      showMovieDetails,
-      prevSlide,
-      nextSlide,
-      offset
-    };
-  }
-});
 </script>
 
 <template>
   <div class="home-page">
     <div class="movie-background">
-      <div class="background-image" :style="{ backgroundImage: `url(${selectedMovie.imageUrl})` }">
+      <div class="background-image" :style="{ backgroundImage: `url(${selectedMovie.Poster})` }">
         <div class="movie-overlay">
-          <h1 class="text-4xl font-bold text-white">{{ selectedMovie.title }}</h1>
-          <p class="text-lg text-white">{{ selectedMovie.description }}</p>
+          <h1 class="text-4xl font-bold text-white">{{ selectedMovie.Title }}</h1>
+          <p class="text-lg text-white">{{ selectedMovie.Plot }}</p>
           <div class="action-buttons">
             <button class="watch-trailer-btn text-white ">Watch Trailer</button>
             <button class="rent-now-btn">
@@ -92,8 +62,8 @@ export default defineComponent({
       <h2 class="text-2xl font-semibold mb-4">Filmes em Destaque</h2>
       <div class="carousel" ref="carousel">
         <div class="carousel-inner" :style="{ transform: `translateX(${offset}px)` }">
-          <div v-for="movie in movies" :key="movie.id" class="carousel-item" @click="showMovieDetails(movie)">
-            <img :src="movie.imageUrl" alt="Movie Image" class="movie-image">
+          <div v-for="movie in movies" :key="movie.Id" class="carousel-item" @click="showMovieDetails(movie)">
+            <img :src="movie.Poster" alt="Movie Image" class="movie-image">
             
           </div>
         </div>
