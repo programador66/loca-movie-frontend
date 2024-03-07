@@ -5,10 +5,10 @@ import { ref } from 'vue';
 
 const navigation = ref([
   { name: 'Home', href: '/home', current: true },
-  { name: 'Rented Movies', href: '#', current: false },
+  { name: 'Rented Movies', href: '/rent-movies', current: false },
   { name: 'Clients', href: '/clients', current: false },
   { name: 'Users', href: '/users', current: false },
-  { name: 'About Us', href: '#', current: false },
+  { name: 'Search Movies', href: '/search-movies', current: false },
 ])
 
 const changeActiveRouter = (activeItemName: string) => {

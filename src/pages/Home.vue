@@ -12,30 +12,30 @@ interface IMovie {
 }
 
 
-    const movies = moviesData;
+  const movies = moviesData;
 
-    const selectedMovie = ref(movies[0]);
-    const offset = ref(0);
+  const selectedMovie = ref(movies[Math.floor(Math.random() * 12) + 1]);
+  const offset = ref(0);
 
-    const showMovieDetails = (movie: IMovie) => {
-      selectedMovie.value = movie;
-    };
+  const showMovieDetails = (movie: IMovie) => {
+    selectedMovie.value = movie;
+  };
 
-    const prevSlide = () => {
-      if (offset.value < 0) {
-        offset.value += 340;
+  const prevSlide = () => {
+    if (offset.value < 0) {
+      offset.value += 340;
+    }
+  };
+
+  const nextSlide = () => {
+    const carousel = document.querySelector('.carousel-inner');
+    if (carousel) {
+      const maxOffset = carousel.scrollWidth - carousel.clientWidth;
+      if (offset.value > -maxOffset) {
+        offset.value -= 340;
       }
-    };
-
-    const nextSlide = () => {
-      const carousel = document.querySelector('.carousel-inner');
-      if (carousel) {
-        const maxOffset = carousel.scrollWidth - carousel.clientWidth;
-        if (offset.value > -maxOffset) {
-          offset.value -= 340;
-        }
-      }
-    };
+    }
+  };
 
 </script>
 
@@ -58,7 +58,7 @@ interface IMovie {
         </div>
       </div>
     </div>
-    <div class="movie-carousel mt-8">
+    <div class="movie-carousel mt-2">
       <h2 class="text-2xl font-semibold mb-4">Filmes em Destaque</h2>
       <div class="carousel" ref="carousel">
         <div class="carousel-inner" :style="{ transform: `translateX(${offset}px)` }">
@@ -110,7 +110,7 @@ interface IMovie {
 }
 
 .movie-carousel {
-  margin-top: 50px;
+  margin-top: 24px;
   margin-bottom: 80px;
 }
 

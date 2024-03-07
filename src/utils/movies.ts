@@ -1,4 +1,4 @@
-interface IomdbMovies {
+export interface IOmdbMovies {
   Id?: string,
   Title: string,
   Year: string,
@@ -6,9 +6,9 @@ interface IomdbMovies {
   Poster: string
 }
 
-export const moviesData: IomdbMovies[] = [
+export const moviesData: IOmdbMovies[] = [
   { 
-    Id: '1',
+    Id: 'tt0848228',
     Title: "The Avengers",
     Plot: "Um clássico filme de máfia dirigido por Francis Ford Coppola.",
     Poster: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX2048.jpg",

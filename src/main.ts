@@ -107,6 +107,8 @@ import ThemeSwitcher from './components/PrimeVue/ThemeSwitcher.vue';
 import Configurator from './components/PrimeVue/Configurator.vue';
 import Lara from './presets/lara';
 import appState from './plugins/appState.js';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
 
 const app = createApp(App)
 
@@ -117,6 +119,8 @@ app.directive('styleclass', StyleClass);
 app.directive('focustrap', FocusTrap);
 app.directive('animateonscroll', AnimateOnScroll);
 
+app.component('IconField', IconField);
+app.component('InputIcon', InputIcon);
 app.component('Accordion', Accordion);
 app.component('AccordionTab', AccordionTab);
 app.component('AutoComplete', AutoComplete);

@@ -3,6 +3,9 @@
       <section v-if="icon === 'PENCIL'" >
         <PencilIcon class="h-4 w-5" />
       </section>
+      <section v-if="icon === 'PLAY'" >
+        <PlayIcon class="h-4 w-5" />
+      </section>
         {{ text }}
     </button>
 </template>
@@ -10,6 +13,7 @@
 <script setup lang="ts">
 import { defineProps} from 'vue';
 import { PencilIcon } from '@heroicons/vue/24/outline';
+import { PlayIcon } from '@heroicons/vue/24/solid';
 
 defineProps({
   text: String,

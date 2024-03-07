@@ -3,6 +3,7 @@ import Login from '../pages/Login.vue';
 import Home from '../pages/Home.vue';
 import Users from '../pages/Users.vue';
 import Clients from '../pages/Clients.vue';
+import SearchMovie from '../pages/SearchMovie.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -30,6 +31,12 @@ const routes: RouteRecordRaw[] = [
     path: '/clients',
     name: 'Clients',
     component: Clients,
+    meta: { requiresAuth: true } // Rota protegida que requer autenticação
+  },
+  {
+    path: '/search-movies',
+    name: 'SearchMovie',
+    component: SearchMovie,
     meta: { requiresAuth: true } // Rota protegida que requer autenticação
   }
 ]
