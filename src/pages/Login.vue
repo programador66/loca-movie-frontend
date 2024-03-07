@@ -26,8 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { IUser } from '../services/UserService';
+import { ref, onMounted } from 'vue';
+import UserService, { IUser } from '../services/UserService';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from 'vue-router';
 
@@ -38,6 +38,28 @@ const formData = ref({
 })
 const toast = useToast();
 const router = useRouter();
+
+onMounted(() => {
+    const userDataJson = localStorage.getItem('userData');
+    const data: IUser[] = userDataJson ?  JSON.parse(userDataJson) : [];
+
+    const foundUser = data.find(d => d.username === 'admin');
+
+    if (!foundUser) {
+        const createUser = {
+                id: '0',
+                name: 'admin',
+                username: 'admin',
+                document: 'admin',
+                password: 'admin',
+                status: 'ACTIVE',
+                createdAt: new Date,
+                updatedAt: null
+        }
+
+        UserService.registerUser(createUser);
+    }
+})
 
 const login = () => {
 

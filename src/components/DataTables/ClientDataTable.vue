@@ -6,9 +6,9 @@
                 <section class="flex items-center justify-between">
                     <div class="flex items-center">
                         <ButtonSecondary 
-                                :text="'New User'" 
+                                :text="'New Client'" 
                                 :icon="'PLUS'" 
-                                @click="handleRegisterUser" 
+                                @click="handleRegisterClient" 
                         />
                     </div>
                     <div class="flex justify-end">
@@ -24,7 +24,7 @@
             <template v-for="column in columns" :key="column.field">
                 <Column v-if="column.field !== 'status'" :field="column.field" :header="column.header" :style="column.style" :class="column.class">
                     <template #body="{ data }">
-                        {{ data[column.field] }}
+                        {{ column.field === 'userRegister.name' ? data.userRegister.name : data[column.field] }}
                     </template>
                     <template #filter="{ filterModel, filterCallback }">
                         <InputText v-model="filterModel.value" type="text" @input="filterCallback()" class="p-column-filter" :placeholder="'Search by ' + column.header" />
@@ -51,12 +51,12 @@
                         <ButtonPrimary 
                             :text="'Update'" 
                             :icon="'PENCIL'" 
-                            @click="handleUpdateUser(data)" 
+                            @click="handleUpdateClient(data)" 
                         />
                         <ButtonDanger 
                             :text="'Delete'" 
                             :icon="'TRASH'"
-                            @click="handleDeleteUser(data)" 
+                            @click="handleDeleteClient(data)" 
                         />
                     </section>
                 </template>
@@ -81,28 +81,30 @@ console.log("data", data);
 
 const localfilter = {
     "global": { value: null, matchMode: FilterMatchMode.CONTAINS },
-    "id": { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    "cpf": { value: null, matchMode: FilterMatchMode.CONTAINS },
     "name": { value: null, matchMode: FilterMatchMode.CONTAINS },
-    "document": { value: null, matchMode: FilterMatchMode.CONTAINS },
-    "status": { value: null, matchMode: FilterMatchMode.EQUALS }
+    "email": { value: null, matchMode: FilterMatchMode.CONTAINS },
+    "userRegister.name": { value: null, matchMode: FilterMatchMode.CONTAINS },
+    "status": { value: null, matchMode: FilterMatchMode.EQUALS },
 }
 
 const emit = defineEmits([
-        'update-user',
-        'delete-user',
-        'register-user'
+        'update-client',
+        'delete-client',
+        'register-client'
     ]);
 
 const filters = ref(localfilter);
 
-const globalFilterFields = ['id', 'name', 'status'];
+const globalFilterFields = ['name', 'status'];
 
 const loading = ref(false);
 
 const columns = [
-    { field: 'id', header: 'ID', style: 'min-width: 12rem', class: 'text-gray-700' },
     { field: 'name', header: 'Name', style: 'min-width: 12rem', class: 'text-gray-700' },
-    { field: 'document', header: 'Document', style: 'min-width: 12rem', class: 'text-gray-700' },
+    { field: 'cpf', header: 'Cpf', style: 'min-width: 12rem', class: 'text-gray-700' },
+    { field: 'email', header: 'E-mail', style: 'min-width: 12rem', class: 'text-gray-700' },
+    { field: 'userRegister.name', header: 'Register By ', style: 'min-width: 12rem' },
     { field: 'status', header: 'Status', style: 'min-width: 12rem' },
 ];
 
@@ -118,14 +120,14 @@ const getSeverity = (status: string) => {
     }
 }
 
-const handleRegisterUser = () =>  emit('register-user');
+const handleRegisterClient = () =>  emit('register-client');
 
-const handleUpdateUser = (rowData:any) => {
-  emit('update-user', rowData);
+const handleUpdateClient = (rowData:any) => {
+  emit('update-client', rowData);
 };
 
-const handleDeleteUser = (rowData:any) => {
-  emit('delete-user', rowData);
+const handleDeleteClient = (rowData:any) => {
+  emit('delete-client', rowData);
 };
 </script>
 

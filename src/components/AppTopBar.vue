@@ -5,8 +5,8 @@ import { ref } from 'vue';
 
 const navigation = ref([
   { name: 'Home', href: '/home', current: true },
-  { name: 'Movies', href: '#', current: false },
-  { name: 'Clients', href: '#', current: false },
+  { name: 'Rented Movies', href: '#', current: false },
+  { name: 'Clients', href: '/clients', current: false },
   { name: 'Users', href: '/users', current: false },
   { name: 'About Us', href: '#', current: false },
 ])

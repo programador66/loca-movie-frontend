@@ -2,11 +2,12 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Login from '../pages/Login.vue';
 import Home from '../pages/Home.vue';
 import Users from '../pages/Users.vue';
+import Clients from '../pages/Clients.vue';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/login' // Redireciona a rota raiz para /login
+    redirect: '/login'
   },
   {
     path: '/login',
@@ -23,6 +24,12 @@ const routes: RouteRecordRaw[] = [
     path: '/home',
     name: 'Home',
     component: Home,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/clients',
+    name: 'Clients',
+    component: Clients,
     meta: { requiresAuth: true } // Rota protegida que requer autenticação
   }
 ]
@@ -37,18 +44,16 @@ router.beforeEach((to, from, next) => {
   const session = data ? JSON.parse(data) : null;
 
   if (session && session?.isLoggedIn) {
-    // Se o usuário estiver logado, redirecione para a página inicial
     if (to.path === '/login') {
       next('/home');
     } else {
-      next(); // Continuar para a próxima rota
+      next();
     }
   } else {
     if (to.meta.requiresAuth && !session?.isLoggedIn) {
-      // Se a rota requer autenticação e o usuário não está logado, redirecione para a página de login
       next('/login');
     } else {
-      next(); // Continuar para a próxima rota
+      next();
     }
   }
 })
