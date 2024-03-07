@@ -126,7 +126,6 @@ const handleRegisterClient = async () => {
       const data = localStorage.getItem('user@session');
       const userSession = data ? JSON.parse(data) : null;
 
-
       const newUser = {
         id: uuidv4(),
         name: formData.value.name,
