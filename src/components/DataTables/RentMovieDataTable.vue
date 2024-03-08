@@ -43,7 +43,7 @@
             <template>
                 <Column header="Actions">
                 <template #body="{ data }">
-                    <section class="action-buttons">
+                    <section class="action-buttons" v-if="data.status !== 'ENTREGUE'">
                         <ButtonPrimary 
                             :text="'Delivery'" 
                             :icon="'PAUSE'" 

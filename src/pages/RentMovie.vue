@@ -3,7 +3,7 @@
     <div class="card flex flex-wrap justify-center gap-1">
         <span class="relative flex-grow max-w-[80%] sm:max-w-[50%] md:max-w-[40%] lg:max-w-[30%] xl:max-w-[25%]">
             <i class="pi pi-search absolute top-2/4 -mt-2 left-3 text-surface-400 dark:text-surface-600" />
-            <InputText v-model="searchMovie" placeholder="Search Movie" class="pl-10 w-full" :disabled="isLoading"
+            <InputText v-model="searchMovie" placeholder="Search movie to rent" class="pl-10 w-full" :disabled="isLoading"
                 @keydown.enter="searchMovieService" />
         </span>
         <ButtonSecondary :text="'Search Movie'" @click="searchMovieService" :disabled="isLoading" />
@@ -265,6 +265,7 @@ const clearFormData = () => {
         Year: ''
     }
     isDeliveryMovie.value = false;
+    searchMovie.value = '';
 }
 
 </script>
