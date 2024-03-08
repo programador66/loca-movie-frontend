@@ -1,14 +1,27 @@
 <script setup lang="ts">
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 
 const navigation = ref([
-  { name: 'Home', href: '/home', current: true },
-  { name: 'Rent Movies', href: '/rent-movies', current: false },
-  { name: 'Clients', href: '/clients', current: false },
-  { name: 'Users', href: '/users', current: false },
-])
+      { name: 'Home', href: '/home', current: false },
+      { name: 'Rent Movies', href: '/rent-movies', current: false },
+      { name: 'Clients', href: '/clients', current: false },
+      { name: 'Users', href: '/users', current: false },
+    ]);
+  
+const setActiveRoute = () => {
+  navigation.value.forEach((navItem) => {
+    navItem.current = navItem.href === route.path;
+  });
+};
+
+onMounted(() => {
+  setActiveRoute();
+});
 
 const changeActiveRouter = (activeItemName: string) => {
   navigation.value.forEach((navItem) => {

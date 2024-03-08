@@ -24,7 +24,7 @@
             <ButtonPrimary :icon="'PLAY'" :text="'Rent now'" class="mt-5" @click="handleRegisterRentMovie" />
         </div>
     </div>
-    <RentMovieDataTable :data="rentMovieData" @delivery-rent-movie="handleDeliveryRentMovie" />
+    <RentMovieDataTable :data="rentMovieData" @delivery-rent-movie="handleDeliveryRentMovie" :key="tableKey" />
 
     <ConfirmDialog group="headless" style="width: 30rem !important;">
         <template #container="{ message, acceptCallback, rejectCallback }">
@@ -45,18 +45,23 @@
                             <InputText id="movie" v-model="movieData.Title" class="w-full sm:w-80" disabled />
                         </div>
                         <div class="p-field p-col mb-2">
+                            <label for="movie" class="block mb-1 font-bold ">Client</label>
+                            <AutoComplete v-model="selectedClients" optionLabel="name" :suggestions="filteredClients"
+                                @complete="searchClient" />
+                        </div>
+                        <div class="p-field p-col mb-2">
                             <label for="icondisplay" class="font-bold block mb-2"> Date Rent </label>
-                            <Calendar v-model="rentMovie.date_location" showIcon iconDisplay="input"
+                            <Calendar v-model="rentMovieForm.date_location" showIcon iconDisplay="input"
                                 inputId="icondisplay" date-format="dd/mm/yy" />
                         </div>
                         <div class="p-field p-col mb-2">
                             <label for="icondisplay" class="font-bold block mb-2"> Date Delivery Rent </label>
-                            <Calendar v-model="rentMovie.date_delivery" showIcon iconDisplay="input"
+                            <Calendar v-model="rentMovieForm.date_delivery" showIcon iconDisplay="input"
                                 inputId="icondisplay" date-format="dd/mm/yy" />
                         </div>
                         <div class="p-field p-col pb-8 mb-2">
                             <label for="status" class="block mb-1 font-bold">Status</label>
-                            <Dropdown id="status" v-model="rentMovie.status" :options="statusOptions"
+                            <Dropdown id="status" v-model="rentMovieForm.status" :options="statusOptions"
                                 optionLabel="label" optionValue="value" class="w-full sm:w-80" disabled />
                         </div>
                     </div>
@@ -72,16 +77,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary.vue';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary.vue';
 import RentMovieDataTable from '../components/DataTables/RentMovieDataTable.vue';
 import ExternalMovieService from '../services/ExternalMovieService.ts';
 import { useToast } from 'primevue/usetoast';
 import { IOmdbMovies } from '../utils/movies.ts';
-import { IRentMovie, Status } from '../services/RentMovieService.ts';
+import RentMovieService, { IRentMovie, Status } from '../services/RentMovieService.ts';
 import { useConfirm } from "primevue/useconfirm";
 import { v4 as uuidv4 } from 'uuid';
+import ClientService, { IClient } from '../services/ClientService.ts';
+import { validateForm } from '../utils/functions.ts';
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -96,7 +103,7 @@ const movieData = ref<IOmdbMovies>({
     Year: ''
 });
 
-const rentMovie = ref({
+const rentMovieForm = ref({
     id: '',
     date_location: '',
     date_delivery: '',
@@ -113,6 +120,17 @@ const statusOptions = ref([
 ]);
 
 const rentMovieData = ref<IRentMovie[]>();
+
+const clients = ref();
+const selectedClients = ref();
+const filteredClients = ref();
+const tableKey = ref(0);
+
+onMounted(async () => {
+    await getRentMovies();
+    const client = await ClientService.getClient();
+    clients.value = client;
+});
 
 const searchMovieService = async () => {
     try {
@@ -150,36 +168,40 @@ const handleRegisterRentMovie = async () => {
         accept: () => {
 
             const dataUser = localStorage.getItem('user@session');
-            const dataClient = localStorage.getItem('ClientData');
-            
             const userSession = dataUser ? JSON.parse(dataUser) : null;
-            const client = dataClient ? JSON.parse(dataClient) : null;
 
-            //   const newRentMovie: IRentMovie = {
-            //     id: uuidv4(),
-            //     date_location: new Date(rentMovie.value.date_location),
-            //     date_delivery: new Date(rentMovie.value.date_delivery),
-            //     status: rentMovie.value.status,
-            //     createdAt: new Date(),
-            //     updatedAt: null,
-            //     movieRented: {
+            const newRentMovie: IRentMovie = {
+                id: uuidv4(),
+                date_location: new Date(rentMovieForm.value.date_location),
+                date_delivery: new Date(rentMovieForm.value.date_delivery),
+                status: rentMovieForm.value.status,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                movieRented: movieData.value,
+                clientRegister: selectedClients.value,
+                rentedBy: userSession.user,
+            }
 
-            //     },
-            //     clientRegister: client,
-            //     rentedBy: userSession,
-            //   }
+            const validate = validateForm(newRentMovie);
 
-            //   try {
-            //     const clientResponse: any = ClientService.registerClient(newUser);
-            //     if (clientResponse.response === 201) {
-            //       toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Register Successfuly', life: 3000 });
-            //       clearFormData();
-            //       getClients();
-            //       tableKey.value += 1;
-            //     }
-            //   } catch (error) {
-            //     toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${error}`, life: 3000 });
-            //   }
+            if (!validate) {
+                toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - check empty fields!`, life: 3000 });
+                return;
+            }
+
+            try {
+                const rentMovieResponse: any = RentMovieService.registerRentMovie(newRentMovie);
+                if (rentMovieResponse.response === 400) {
+                    toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${rentMovieResponse.msg}`, life: 3000 });
+                    return;
+                }
+                toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Register Successfuly', life: 3000 });
+                clearFormData();
+                getRentMovies();
+                tableKey.value += 1;
+            } catch (error) {
+                toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${error}`, life: 3000 });
+            }
 
         },
         reject: () => {
@@ -190,6 +212,47 @@ const handleRegisterRentMovie = async () => {
 
 const handleDeliveryRentMovie = async () => {
 
+}
+
+const getRentMovies = async () => {
+    const response = await RentMovieService.getRentMovie();
+    const sortData = response
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return rentMovieData.value = sortData;
+};
+
+const searchClient = (event: any) => {
+    setTimeout(() => {
+        if (!event.query.trim().length) {
+            filteredClients.value = [...clients.value];
+        } else {
+            filteredClients.value = clients.value.filter((client: any) => {
+                return client.name.toLowerCase().startsWith(event.query.toLowerCase());
+            });
+        }
+    }, 250);
+}
+
+const clearFormData = () => {
+    rentMovieForm.value = {
+        id: '',
+        date_location: '',
+        date_delivery: '',
+        status: Status.ALUGADO,
+        createdAt: '',
+        updatedAt: '',
+        movieRented: '',
+        clientRegister: '',
+        rentedBy: '',
+    }
+
+    movieData.value = {
+        Id: '',
+        Title: '',
+        Plot: '',
+        Poster: '',
+        Year: ''
+    }
 }
 
 </script>

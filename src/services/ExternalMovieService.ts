@@ -5,7 +5,7 @@ class ExternalMovieService {
 
     constructor() {
       const api = axios.create({
-        baseURL: `https:///www.omdbapi.com/`,
+        baseURL: `https://www.omdbapi.com/`,
       });
       this.api = api;
     }

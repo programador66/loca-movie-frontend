@@ -20,7 +20,7 @@
             <template v-for="column in columns" :key="column.field">
                 <Column v-if="column.field !== 'status'" :field="column.field" :header="column.header" :style="column.style" :class="column.class">
                     <template #body="{ data }">
-                        {{ column.field === 'userRegister.name' ? data.userRegister.name : data[column.field] }}
+                        {{ buildColumn(column, data) }}
                     </template>
                     <template #filter="{ filterModel, filterCallback }">
                         <InputText v-model="filterModel.value" type="text" @input="filterCallback()" class="p-column-filter" :placeholder="'Search by ' + column.header" />
@@ -45,8 +45,8 @@
                 <template #body="{ data }">
                     <section class="action-buttons">
                         <ButtonPrimary 
-                            :text="'Update'" 
-                            :icon="'PENCIL'" 
+                            :text="'Delivery'" 
+                            :icon="'PAUSE'" 
                             @click="handleDeliveryRentMovie(data)" 
                         />
                     </section>
@@ -62,18 +62,17 @@ import { ref, defineEmits} from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary.vue';
 import { Status } from '../../services/RentMovieService';
+import { convetDate } from '../../utils/functions';
 
 const { data } = defineProps({
     data: Array,
 });
 
-console.log("data", data);
-
 const localfilter = {
     "global": { value: null, matchMode: FilterMatchMode.CONTAINS },
     "clientRegister.name": { value: null, matchMode: FilterMatchMode.CONTAINS },
     "movieRented.Title": { value: null, matchMode: FilterMatchMode.CONTAINS },
-    "userRegister.name": { value: null, matchMode: FilterMatchMode.CONTAINS },
+    "rentedBy.name": { value: null, matchMode: FilterMatchMode.CONTAINS },
     "date_location": { value: null, matchMode: FilterMatchMode.CONTAINS },
     "status": { value: null, matchMode: FilterMatchMode.EQUALS },
 }
@@ -91,8 +90,8 @@ const loading = ref(false);
 const columns = [
     { field: 'clientRegister.name', header: 'Client', style: 'min-width: 12rem', class: 'text-gray-700' },
     { field: 'movieRented.Title', header: 'Movie', style: 'min-width: 12rem', class: 'text-gray-700' },
-    { field: 'userRegister.name', header: 'Rented By ', style: 'min-width: 12rem' },
-    { field: 'date_location', header: 'E-mail', style: 'min-width: 12rem', class: 'text-gray-700' },
+    { field: 'rentedBy.name', header: 'Rented By ', style: 'min-width: 12rem' },
+    { field: 'date_location', header: 'Date Rent', style: 'min-width: 12rem', class: 'text-gray-700' },
     { field: 'status', header: 'Status', style: 'min-width: 12rem' },
 ];
 
@@ -111,6 +110,20 @@ const getSeverity = (status: Status) => {
 const handleDeliveryRentMovie = (rowData:any) => {
   emit('delivery-rent-movie', rowData);
 };
+
+const buildColumn = (column:any, data:any) => {
+    if (column.field === 'rentedBy.name') {
+        return data.rentedBy.name;
+    } else if (column.field === 'clientRegister.name') {
+        return data.clientRegister.name;
+    } else if (column.field === 'movieRented.Title') {
+        return data.movieRented.Title;
+    } else if (column.field === 'date_location') {
+        return convetDate(data.date_location);
+    } else {
+        return data[column.field];
+    }
+}
 
 </script>
 
