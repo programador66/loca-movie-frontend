@@ -1,4 +1,4 @@
-export const convetDate = (date: Date) => {
+export const convetDate = (date: Date = new Date) => {
     const data = new Date(date);
 
     const dia = data.getDate().toString().padStart(2, '0');

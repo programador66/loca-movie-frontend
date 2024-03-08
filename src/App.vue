@@ -6,7 +6,7 @@ import AppFooter from './components/AppFooter.vue';
 </script>
 
 <template>
-  <div class="">
+  <div style="padding: 0;">
     <AppTopBar />
       <RouterView />
     <AppFooter />

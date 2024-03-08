@@ -30,7 +30,9 @@ class RentMovieService {
 
     registerRentMovie(newRentMovie: IRentMovie) {
         try {            
-            const verifyIsClientRentedMovie = this.data.find(client => client.clientRegister.id === newRentMovie.clientRegister.id);
+            const verifyIsClientRentedMovie = this.data
+            .find(rent => rent.clientRegister.id === newRentMovie.clientRegister.id && rent.status === Status.ALUGADO);
+
             if (verifyIsClientRentedMovie) {
                 return {
                     response: 400,
@@ -44,6 +46,29 @@ class RentMovieService {
             return {
                 response: 201,
                 data: newRentMovie
+            }
+        } catch (error) {
+            return error
+        }
+    }
+
+    deliveryMovie(id: string = '') {
+        try {            
+        
+            const findClient = this.data.find(rent => rent.id === id);
+            if (!findClient) {
+                return {
+                    response: 404,
+                    msg: 'Rent not found'
+                }
+            }
+            
+            findClient.status = Status.ENTREGUE;
+            localStorage.setItem('rentMovieData', JSON.stringify(this.data));
+
+            return {
+                response: 200,
+                data: findClient
             }
         } catch (error) {
             return error

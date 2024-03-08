@@ -11,7 +11,7 @@
                 </div>
                 <div class="p-field p-col mb-2">
                     <label for="password" class="block mb-1">Password</label>
-                    <Password id="password" v-model="formData.password" :feedback="false" class="w-full sm:w-80" />
+                    <Password id="password" v-model="formData.password" :feedback="false" class="w-full sm:w-80" @keydown.enter="login" />
                 </div>
             </div>
         </div>
@@ -47,14 +47,14 @@ onMounted(() => {
 
     if (!foundUser) {
         const createUser = {
-                id: '0',
-                name: 'admin',
-                username: 'admin',
-                document: 'admin',
-                password: 'admin',
-                status: 'ACTIVE',
-                createdAt: new Date,
-                updatedAt: null
+            id: '0',
+            name: 'admin',
+            username: 'admin',
+            document: 'admin',
+            password: 'admin',
+            status: 'ACTIVE',
+            createdAt: new Date,
+            updatedAt: null
         }
 
         UserService.registerUser(createUser);

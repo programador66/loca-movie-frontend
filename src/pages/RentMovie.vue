@@ -21,19 +21,19 @@
             <h3 class="text-4xl font-bold">Título: {{ movieData.Title }}</h3>
             <p class="text-1xl font-bold">Descrição: {{ movieData.Plot }}</p>
             <p class="text-1xl font-bold">Ano: {{ movieData.Year }}</p>
-            <ButtonPrimary :icon="'PLAY'" :text="'Rent now'" class="mt-5" @click="handleRegisterRentMovie" />
+            <ButtonPrimary :icon="'PLAY'" :text="'Rent now'" class="mt-5" @click="isRentModalOpen = true;" />
         </div>
     </div>
-    <RentMovieDataTable :data="rentMovieData" @delivery-rent-movie="handleDeliveryRentMovie" :key="tableKey" />
+    <RentMovieDataTable :data="rentMovieData" @delivery-rent-movie="handleOpenDeliverModal" :key="tableKey" />
 
-    <ConfirmDialog group="headless" style="width: 30rem !important;">
-        <template #container="{ message, acceptCallback, rejectCallback }">
+    <Dialog v-model:visible="isRentModalOpen" modal header="New Movie Rent" :style="{ width: '28rem' }"
+      :breakpoints="{ '800px': '90vw', '575px': '100vw' }" :closable="true">
             <div class="flex flex-col items-center p-5 bg-surface-0 dark:bg-surface-700 rounded-md">
                 <div
-                    class="rounded-full bg-primary-500 dark:bg-primary-400 text-surface-0 dark:text-surface-900 inline-flex justify-center items-center h-[6rem] w-[6rem] -mt-[3rem]">
+                    class="rounded-full bg-primary-500 dark:bg-primary-400 text-surface-0 dark:text-surface-900 inline-flex justify-center items-center h-[6rem] w-[6rem] -mt-[1rem]">
                     <i class="pi pi-video text-5xl"></i>
                 </div>
-                <span class="font-bold text-2xl block mb-2 mt-4">{{ message.header }}</span>
+                <span class="font-bold text-2xl block mb-2 mt-4">New Movie Rent</span>
                 <div class="max-w-sm">
                     <div class="p-fluid p-grid p-formgrid">
                         <div class="p-field p-col mb-2" hidden>
@@ -46,17 +46,17 @@
                         </div>
                         <div class="p-field p-col mb-2">
                             <label for="movie" class="block mb-1 font-bold ">Client</label>
-                            <AutoComplete v-model="selectedClients" optionLabel="name" :suggestions="filteredClients"
+                            <AutoComplete v-model="selectedClients" :disabled="isDeliveryMovie" :inputStyle="{ width: '280px' }" optionLabel="name" :suggestions="filteredClients"
                                 @complete="searchClient" />
                         </div>
                         <div class="p-field p-col mb-2">
                             <label for="icondisplay" class="font-bold block mb-2"> Date Rent </label>
-                            <Calendar v-model="rentMovieForm.date_location" showIcon iconDisplay="input"
+                            <Calendar v-model="rentMovieForm.date_location" showIcon iconDisplay="input" :disabled="isDeliveryMovie"
                                 inputId="icondisplay" date-format="dd/mm/yy" />
                         </div>
                         <div class="p-field p-col mb-2">
                             <label for="icondisplay" class="font-bold block mb-2"> Date Delivery Rent </label>
-                            <Calendar v-model="rentMovieForm.date_delivery" showIcon iconDisplay="input"
+                            <Calendar v-model="rentMovieForm.date_delivery" showIcon iconDisplay="input" :disabled="isDeliveryMovie"
                                 inputId="icondisplay" date-format="dd/mm/yy" />
                         </div>
                         <div class="p-field p-col pb-8 mb-2">
@@ -67,12 +67,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 mt-4">
-                    <Button label="Save" @click="acceptCallback" class="w-[8rem]"></Button>
-                    <Button label="Cancel" outlined @click="rejectCallback" class="w-[8rem]"></Button>
+
+                    <Button v-if="!isDeliveryMovie" label="Rent" @click="handleRegisterRentMovie" class="w-[8rem]"></Button>
+                    <Button v-else label="Delivery" @click="handleDeliveryRentMovie" class="w-[8rem]"></Button>
+                    <Button label="Cancel" outlined @click="isRentModalOpen = false" class="w-[8rem]"></Button>
                 </div>
             </div>
-        </template>
-    </ConfirmDialog>
+    </Dialog>
 
 </template>
 
@@ -85,16 +86,16 @@ import ExternalMovieService from '../services/ExternalMovieService.ts';
 import { useToast } from 'primevue/usetoast';
 import { IOmdbMovies } from '../utils/movies.ts';
 import RentMovieService, { IRentMovie, Status } from '../services/RentMovieService.ts';
-import { useConfirm } from "primevue/useconfirm";
 import { v4 as uuidv4 } from 'uuid';
-import ClientService, { IClient } from '../services/ClientService.ts';
-import { validateForm } from '../utils/functions.ts';
+import ClientService from '../services/ClientService.ts';
+import { convetDate, validateForm } from '../utils/functions.ts';
 
-const confirm = useConfirm();
 const toast = useToast();
 const isLoading = ref(false);
-const searchMovie = ref<string>('');
+const isRentModalOpen = ref<boolean>(false);
+const isDeliveryMovie = ref<boolean>(false);
 
+const searchMovie = ref<string>('');
 const movieData = ref<IOmdbMovies>({
     Id: '',
     Title: '',
@@ -155,63 +156,73 @@ const searchMovieService = async () => {
 }
 
 const handleRegisterRentMovie = async () => {
-    confirm.require({
-        group: 'headless',
-        header: 'New Rent Movie',
-        message: 'Please confirm to proceed moving forward.',
-        acceptIcon: 'pi pi-check',
-        rejectIcon: 'pi pi-times',
-        acceptLabel: "Save",
-        rejectLabel: "Cancel",
-        rejectClass: 'p-button-sm p-button-outlined p-button-danger',
-        acceptClass: 'p-button-outlined p-button-sm',
-        accept: () => {
+    const dataUser = localStorage.getItem('user@session');
+    const userSession = dataUser ? JSON.parse(dataUser) : null;
 
-            const dataUser = localStorage.getItem('user@session');
-            const userSession = dataUser ? JSON.parse(dataUser) : null;
+    const newRentMovie: IRentMovie = {
+        id: uuidv4(),
+        date_location: new Date(rentMovieForm.value.date_location),
+        date_delivery: new Date(rentMovieForm.value.date_delivery),
+        status: rentMovieForm.value.status,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        movieRented: movieData.value,
+        clientRegister: selectedClients.value,
+        rentedBy: userSession.user,
+    }
 
-            const newRentMovie: IRentMovie = {
-                id: uuidv4(),
-                date_location: new Date(rentMovieForm.value.date_location),
-                date_delivery: new Date(rentMovieForm.value.date_delivery),
-                status: rentMovieForm.value.status,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                movieRented: movieData.value,
-                clientRegister: selectedClients.value,
-                rentedBy: userSession.user,
-            }
+    const validate = validateForm(newRentMovie);
 
-            const validate = validateForm(newRentMovie);
+    if (!validate) {
+        toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - check empty fields!`, life: 3000 });
+        return;
+    }
 
-            if (!validate) {
-                toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - check empty fields!`, life: 3000 });
-                return;
-            }
-
-            try {
-                const rentMovieResponse: any = RentMovieService.registerRentMovie(newRentMovie);
-                if (rentMovieResponse.response === 400) {
-                    toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${rentMovieResponse.msg}`, life: 3000 });
-                    return;
-                }
-                toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Register Successfuly', life: 3000 });
-                clearFormData();
-                getRentMovies();
-                tableKey.value += 1;
-            } catch (error) {
-                toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${error}`, life: 3000 });
-            }
-
-        },
-        reject: () => {
-            toast.add({ severity: 'error', summary: 'Cancelled', detail: `Operation cancelled`, life: 3000 });
+    try {
+        const rentMovieResponse: any = RentMovieService.registerRentMovie(newRentMovie);
+        if (rentMovieResponse.response === 400) {
+            toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${rentMovieResponse.msg}`, life: 3000 });
+            return;
         }
-    });
+        toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Register Successfuly', life: 3000 });
+        clearFormData();
+        getRentMovies();
+        tableKey.value += 1;
+        isRentModalOpen.value = false;
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${error}`, life: 3000 });
+    }
+
+}
+
+const handleOpenDeliverModal = (data:IRentMovie) => {
+    isDeliveryMovie.value = true;
+    isRentModalOpen.value = true;
+    rentMovieForm.value.id = data.id;
+    movieData.value.Title = data.movieRented.Title;
+    selectedClients.value = data.clientRegister.name;
+    rentMovieForm.value.date_location = convetDate(data.date_location);
+    rentMovieForm.value.date_delivery = convetDate(data.date_delivery);
+    rentMovieForm.value.status = Status.ENTREGUE;
 }
 
 const handleDeliveryRentMovie = async () => {
+    try {
+        const delivery: any = RentMovieService.deliveryMovie(rentMovieForm.value.id);
 
+        if (delivery.response === 404) {
+            toast.add({ severity: 'error', summary: 'Rejected', detail: `Delivery error, rent not found`, life: 3000 });
+            return;
+        }
+
+        toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Movie delivery with Successfuly', life: 3000 });
+        clearFormData();
+        getRentMovies();
+        tableKey.value += 1;
+        isRentModalOpen.value = false;
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Rejected', detail: `Delivery - ${error}`, life: 3000 });
+    }
 }
 
 const getRentMovies = async () => {
@@ -253,6 +264,7 @@ const clearFormData = () => {
         Poster: '',
         Year: ''
     }
+    isDeliveryMovie.value = false;
 }
 
 </script>

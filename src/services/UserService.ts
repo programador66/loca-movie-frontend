@@ -46,6 +46,13 @@ class UserService {
         }
     }
 
+    getSession() {
+        const dataUser = localStorage.getItem('user@session');
+        const userSession = dataUser ? JSON.parse(dataUser) : null;
+
+        return userSession;
+    }
+
 }
 
 export default new UserService();

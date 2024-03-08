@@ -1,116 +1,95 @@
 <script setup lang="ts">
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import UserService from '../services/UserService';
+import { useRouter } from 'vue-router';
 
-const route = useRoute();
+const router = useRouter();
 
-const navigation = ref([
-      { name: 'Home', href: '/home', current: false },
-      { name: 'Rent Movies', href: '/rent-movies', current: false },
-      { name: 'Clients', href: '/clients', current: false },
-      { name: 'Users', href: '/users', current: false },
-    ]);
-  
-const setActiveRoute = () => {
-  navigation.value.forEach((navItem) => {
-    navItem.current = navItem.href === route.path;
-  });
-};
-
-onMounted(() => {
-  setActiveRoute();
+const user = ref({
+  name: ''
 });
 
-const changeActiveRouter = (activeItemName: string) => {
-  navigation.value.forEach((navItem) => {
-    navItem.current = navItem.name === activeItemName;
-  });
-};
+
+onMounted(() => {
+  const session = UserService.getSession();
+  user.value = session ? session.user : {user: {name: ''}};
+})
 
 const logout = () => {
   localStorage.removeItem('user@session');
+  router.push('/');
 }
 
+
+const items = ref([
+    {
+        label: 'Home',
+        icon: 'pi pi-home',
+        route: '/home'
+    },
+    {
+        label: 'Rent Movies',
+        icon: 'pi pi-shopping-cart',
+        route: '/rent-movies'
+    },
+    {
+        label: 'Clients',
+        icon: 'pi pi-users',
+        route: '/Clients'
+    },
+    {
+        label: 'Users',
+        icon: 'pi pi-user',
+        route: '/users'
+    },
+   
+]);
 </script>
 
 <template>
-  <Disclosure as="nav" class="bg-gray-800" v-slot="{ open }">
-    <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-      <div class="relative flex h-16 items-center justify-between">
-        <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
-          <!-- Mobile menu button-->
-          <DisclosureButton
-            class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-            <span class="absolute -inset-0.5" />
-            <span class="sr-only">Open main menu</span>
-            <Bars3Icon v-if="!open" class="block h-6 w-6" aria-hidden="true" />
-            <XMarkIcon v-else class="block h-6 w-6" aria-hidden="true" />
-          </DisclosureButton>
-        </div>
-        <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-          <div class="flex flex-shrink-0 items-center">
-            <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-              alt="Your Company" />
-          </div>
-          <div class="hidden sm:ml-6 sm:block">
-            <div class="flex space-x-4">
-              <router-link v-for="item in navigation" @click="changeActiveRouter(item.name)" :key="item.name"
-                :to="item.href"
-                :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']"
-                :aria-current="item.current ? 'page' : undefined" exact>
-                {{ item.name }}
-              </router-link>
-            </div>
-          </div>
-        </div>
-        <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-
-          <!-- Profile dropdown -->
-          <Menu as="div" class="relative ml-3">
-            <div>
-              <MenuButton
-                class="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                <span class="absolute -inset-1.5" />
-                <span class="sr-only">Open user menu</span>
-                <img class="h-8 w-8 rounded-full"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="" />
-              </MenuButton>
-            </div>
-            <transition enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95">
-              <MenuItems
-                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <MenuItem v-slot="{ active }">
-                <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Your
-                  Profile</a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Settings</a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-
-                <a href="/" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                  @click="logout">Sign out</a>
-                </MenuItem>
-              </MenuItems>
-            </transition>
-          </Menu>
-        </div>
-      </div>
-    </div>
-
-    <DisclosurePanel class="sm:hidden">
-      <div class="space-y-1 px-2 pb-3 pt-2">
-        <DisclosureButton v-for="item in navigation" :key="item.name" as="a" :href="item.href"
-          :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
-          :aria-current="item.current ? 'page' : undefined">{{ item.name }}</DisclosureButton>
-      </div>
-    </DisclosurePanel>
-  </Disclosure>
+  <Menubar :model="items" class="navbar">
+            <template #start>
+                <svg width="35" height="40" viewBox="0 0 35 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-8">
+                    <path
+                        d="M25.87 18.05L23.16 17.45L25.27 20.46V29.78L32.49 23.76V13.53L29.18 14.73L25.87 18.04V18.05ZM25.27 35.49L29.18 31.58V27.67L25.27 30.98V35.49ZM20.16 17.14H20.03H20.17H20.16ZM30.1 5.19L34.89 4.81L33.08 12.33L24.1 15.67L30.08 5.2L30.1 5.19ZM5.72 14.74L2.41 13.54V23.77L9.63 29.79V20.47L11.74 17.46L9.03 18.06L5.72 14.75V14.74ZM9.63 30.98L5.72 27.67V31.58L9.63 35.49V30.98ZM4.8 5.2L10.78 15.67L1.81 12.33L0 4.81L4.79 5.19L4.8 5.2ZM24.37 21.05V34.59L22.56 37.29L20.46 39.4H14.44L12.34 37.29L10.53 34.59V21.05L12.42 18.23L17.45 26.8L22.48 18.23L24.37 21.05ZM22.85 0L22.57 0.69L17.45 13.08L12.33 0.69L12.05 0H22.85Z"
+                        class="fill-primary-500 dark:fill-primary-400"
+                    />
+                    <path
+                        d="M30.69 4.21L24.37 4.81L22.57 0.69L22.86 0H26.48L30.69 4.21ZM23.75 5.67L22.66 3.08L18.05 14.24V17.14H19.7H20.03H20.16H20.2L24.1 15.7L30.11 5.19L23.75 5.67ZM4.21002 4.21L10.53 4.81L12.33 0.69L12.05 0H8.43002L4.22002 4.21H4.21002ZM21.9 17.4L20.6 18.2H14.3L13 17.4L12.4 18.2L12.42 18.23L17.45 26.8L22.48 18.23L22.5 18.2L21.9 17.4ZM4.79002 5.19L10.8 15.7L14.7 17.14H14.74H15.2H16.85V14.24L12.24 3.09L11.15 5.68L4.79002 5.2V5.19Z"
+                        class="fill-surface-700 dark:fill-surface-0/80"
+                    />
+                </svg>
+            </template>
+            <template #item="{ item, props }" class="flex items-center gap-2">
+              <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+                    <a v-ripple :href="href" v-bind="props.action" @click="navigate">
+                        <span :class="item.icon" />
+                        <span class="ml-2">{{ item.label }}</span>
+                    </a>
+                </router-link>
+            </template>
+            <template #end>
+                <div class="flex items-center gap-2">
+                    <strong class="mr-8">User: {{ user?.name }}</strong>
+                    <strong class="logout mr-1" @click="logout">Sair</strong>
+                    <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" shape="circle" />
+                </div>
+            </template>
+        </Menubar>
 </template>
-<style scoped></style>
+<style scoped>
+
+.navbar {
+  margin-top: 0px;
+  background: rgba(17, 24, 39);
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.logout:hover {
+  text-decoration: underline;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+</style>
