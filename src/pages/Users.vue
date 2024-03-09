@@ -104,7 +104,6 @@ const handleRegisterUser = async (data: any) => {
 const handleUpdateUser = (userToUpdate: IUser) => {
   try {
     const userResponse: any = UserService.updateUser(userToUpdate);
-    console.log('chamou', userResponse);
     if (userResponse.response === 404) {
       toast.add({ severity: 'error', summary: 'Rejected', detail: `Update error - ${userResponse.msg}`, life: 3000 });
       return;

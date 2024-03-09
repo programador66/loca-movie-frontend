@@ -2,62 +2,22 @@
 <section>
     <div class="max-w-screen-mlg mx-auto">
       <h2 class="text-2xl font-bold mb-4 text-gray-800 mt-5 ml-8">Client List</h2>
-      <ClientDataTable :data="data" @register-client="handleRegisterClient" @update-client="handleUpdateClient"
-        @delete-client="openModalDecisionDeleteClient" :key="tableKey" />
+      <ClientDataTable 
+        :data="data" 
+        @register-client="openUserModal = true"
+        @update-client="eventToUpdateClient"
+        @delete-client="openModalDecisionDeleteClient"
+        :key="tableKey" />
     </div>
     <Toast />
-    <ConfirmDialog group="headless" style="width: 30rem !important;">
-      <template #container="{ message, acceptCallback, rejectCallback }">
-        <div class="flex flex-col items-center p-5 bg-surface-0 dark:bg-surface-700 rounded-md">
-          <div
-            class="rounded-full bg-primary-500 dark:bg-primary-400 text-surface-0 dark:text-surface-900 inline-flex justify-center items-center h-[6rem] w-[6rem] -mt-[3rem]">
-            <i class="pi pi-user text-5xl"></i>
-          </div>
-          <span class="font-bold text-2xl block mb-2 mt-4">{{ message.header }}</span>
-          <div class="max-w-sm">
-            <div class="p-fluid p-grid p-formgrid">
-              <div class="p-field p-col mb-2" hidden>
-                <label for="id" class="block mb-1">ID</label>
-                <InputText id="id" v-model="formData.id" class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col mb-2">
-                <label for="name" class="block mb-1">Name</label>
-                <InputText id="name" v-model="formData.name" class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col mb-2">
-                <label for="fullname" class="block mb-1">Full Name</label>
-                <InputText id="fullname" v-model="formData.fullName" class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col mb-2">
-                <label for="cpf" class="block mb-1">Cpf</label>
-                <InputMask id="cpf" v-model="formData.cpf" mask="999.999.999-99" placeholder="999.999.999-99"  class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col mb-2">
-                <label for="email" class="block mb-1">E-mail</label>
-                <InputText id="email" v-model="formData.email" class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col mb-2">
-                <label for="celular" class="block mb-1">Celular</label>
-                <InputMask  id="celular" v-model="formData.celular" mask="99-99999-9999" placeholder="99-99999-9999" class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col mb-2">
-                <label for="cep" class="block mb-1">cep</label>
-                <InputMask id="cep" v-model="formData.cep" mask="99999-999" placeholder="99999-999" class="w-full sm:w-80" />
-              </div>
-              <div class="p-field p-col pb-8 mb-2">
-                <label for="status" class="block mb-1">Status</label>
-                <Dropdown id="status" v-model="formData.status" :options="formData.statusOptions" optionLabel="label"
-                  optionValue="value" class="w-full sm:w-80" />
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 mt-4">
-            <Button label="Save" @click="acceptCallback" class="w-[8rem]"></Button>
-            <Button label="Cancel" outlined @click="rejectCallback" class="w-[8rem]"></Button>
-          </div>
-        </div>
-      </template>
-    </ConfirmDialog>
+    <ClientModal 
+      :data="formData"
+      :open-client-modal="openUserModal"
+      :is-update-client="isUpdateUser"
+      @register-new-client="handleRegisterClient"
+      @update-client="handleUpdateClient"
+      @close-modal="clearFormData"
+    />
     <ConfirmPopup></ConfirmPopup>
 
     <Dialog v-model:visible="visible" modal header="Delete User" :style="{ width: '25rem' }"
@@ -78,18 +38,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import ClientDataTable from '../components/DataTables/ClientDataTable.vue';
-import { useConfirm } from "primevue/useconfirm";
+
 import { useToast } from "primevue/usetoast";
-import ClientService, { IClient } from '../services/ClientService';
+import ClientService, { ClientWithoutUser, IClient } from '../services/ClientService';
 import { v4 as uuidv4 } from 'uuid';
+import ClientModal from '../components/Modals/ClientModal.vue';
+import { validateForm } from '../utils/functions';
+import UserService from '../services/UserService';
 
 onMounted(async () => {
   await getClients();
 })
 
-
-const confirm = useConfirm();
 const toast = useToast();
+
+const openUserModal = ref<boolean>(false);
+const isUpdateUser = ref<boolean>(false);
 
 const visible = ref(false);
 const data = ref<IClient[]>();
@@ -104,44 +68,29 @@ const formData = ref({
   celular: '',
   cep: '',
   status: 'ACTIVE',
-  statusOptions: [
-    { label: 'Active', value: 'ACTIVE' },
-    { label: 'Inactive', value: 'INACTIVE' }
-  ]
+  createdAt: new Date(),
+  updatedAt: new Date(),
 })
 
-const handleRegisterClient = async () => {
-  confirm.require({
-    group: 'headless',
-    header: 'Register New Client',
-    message: 'Please confirm to proceed moving forward.',
-    acceptIcon: 'pi pi-check',
-    rejectIcon: 'pi pi-times',
-    acceptLabel: "Save",
-    rejectLabel: "Cancel",
-    rejectClass: 'p-button-sm p-button-outlined p-button-danger',
-    acceptClass: 'p-button-outlined p-button-sm',
-    accept: () => {
+const handleRegisterClient = async (clientRegister: ClientWithoutUser) => {
 
-      const data = localStorage.getItem('user@session');
-      const userSession = data ? JSON.parse(data) : null;
+      const { user } = UserService.getSession();
 
-      const newUser = {
+      const newClient = {
+        ...clientRegister,
         id: uuidv4(),
-        name: formData.value.name,
-        fullName: formData.value.fullName,
-        cpf: formData.value.cpf,
-        email: formData.value.email,
-        celular: formData.value.celular,
-        cep: formData.value.cep,
-        status: formData.value.status,
-        createdAt: new Date(),
-        updatedAt: null,
-        userRegister: userSession.user
+        userRegister: user
+      }
+
+      const validate = validateForm(newClient);
+
+      if (!validate) {
+        toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - check empty fields!`, life: 3000 });
+        return;
       }
 
       try {
-        const clientResponse: any = ClientService.registerClient(newUser);
+        const clientResponse: any = ClientService.registerClient(newClient);
         if (clientResponse.response === 201) {
           toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Register Successfuly', life: 3000 });
           clearFormData();
@@ -152,16 +101,44 @@ const handleRegisterClient = async () => {
         toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - ${error}`, life: 3000 });
       }
 
-    },
-    reject: () => {
-      toast.add({ severity: 'error', summary: 'Cancelled', detail: `Operation cancelled`, life: 3000 });
-    }
-  });
 };
 
-const handleUpdateClient = (rowData: any) => {
-  // Lidar com o evento do botão de ação aqui
-  console.log('Row data:', rowData);
+const eventToUpdateClient = (clientToUpdate: ClientWithoutUser) => {
+  formData.value.id = clientToUpdate.id;
+  formData.value.name = clientToUpdate.name;
+  formData.value.fullName = clientToUpdate.fullName;
+  formData.value.cpf = clientToUpdate.cpf;
+  formData.value.email = clientToUpdate.email;
+  formData.value.celular = clientToUpdate.celular;
+  formData.value.cep = clientToUpdate.cep;
+  formData.value.status = clientToUpdate.status;
+
+  openUserModal.value = true;
+  isUpdateUser.value = true;
+}
+
+const handleUpdateClient = (clientToUpdate: ClientWithoutUser) => {
+  try {
+  
+    const { user } = UserService.getSession();
+
+    const updateClient = {
+      ...clientToUpdate,
+      userRegister: user
+    }
+
+    const clientResponse: any = ClientService.updateClient(updateClient);
+    if (clientResponse.response === 404) {
+      toast.add({ severity: 'error', summary: 'Rejected', detail: `Update error - ${clientResponse.msg}`, life: 3000 });
+      return;
+    }
+    toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Updated Successfully', life: 3000 });
+    getClients();
+    tableKey.value += 1;
+    clearFormData();
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Rejected', detail: `Update error - try again`, life: 3000 });
+  }
 };
 
 const openModalDecisionDeleteClient = (rowData: any) => {
@@ -209,19 +186,18 @@ const getClients = async () => {
 };
 
 const clearFormData = () => {
-  formData.value = {
-    id: '',
-    name: '',
-    fullName: '',
-    cpf: '',
-    email: '',
-    celular: '',
-    cep: '',
-    status: 'ACTIVE',
-    statusOptions: [
-      { label: 'Active', value: 'ACTIVE' },
-      { label: 'Inactive', value: 'INACTIVE' }
-    ]
-  }
+  formData.value.id = '';
+  formData.value.name = '';
+  formData.value.fullName = '';
+  formData.value.cpf = '';
+  formData.value.email = '';
+  formData.value.celular = '';
+  formData.value.cep = '';
+  formData.value.createdAt = new Date();
+  formData.value.updatedAt = new Date();
+  formData.value.status = 'ACTIVE';
+
+  openUserModal.value = false;
+  isUpdateUser.value = false;
 }
 </script>

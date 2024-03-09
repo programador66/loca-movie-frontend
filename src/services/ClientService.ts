@@ -14,9 +14,11 @@ export interface IClient {
     uf?: string;
     status: string;
     createdAt: Date;
-    updatedAt: Date | null;
+    updatedAt: Date;
     userRegister: IUser;
 }
+
+export type ClientWithoutUser = Omit<IClient, 'userRegister'>;
 
 class ClientService {
     
@@ -52,6 +54,35 @@ class ClientService {
         return {
             response: 200,
             data: []
+        }
+    }
+
+    updateClient(userToUpdate: IClient) {
+        try {            
+        
+            const findClient = this.data.find(client => client.id === userToUpdate.id);
+            if (!findClient) {
+                return {
+                    response: 404,
+                    msg: 'user not found'
+                }
+            }
+            findClient.name = userToUpdate.name;
+            findClient.fullName = userToUpdate.fullName;
+            findClient.cpf = userToUpdate.cpf;
+            findClient.email = userToUpdate.email;
+            findClient.celular = userToUpdate.celular;
+            findClient.cep = userToUpdate.cep;
+            findClient.status = userToUpdate.status;
+
+            localStorage.setItem('ClientData', JSON.stringify(this.data));
+
+            return {
+                response: 200,
+                data: findClient
+            }
+        } catch (error) {
+            return error
         }
     }
 
