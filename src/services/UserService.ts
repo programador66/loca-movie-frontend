@@ -6,7 +6,7 @@ export interface IUser {
     password: string;
     status: string;
     createdAt: Date;
-    updatedAt: Date | null;
+    updatedAt: Date;
 }
 
 class UserService {
@@ -43,6 +43,32 @@ class UserService {
         return {
             response: 200,
             data: []
+        }
+    }
+
+    updateUser (userToUpdate: IUser) {
+        try {            
+        
+            const findUser = this.data.find(user => user.id === userToUpdate.id);
+            if (!findUser) {
+                return {
+                    response: 404,
+                    msg: 'user not found'
+                }
+            }
+            findUser.name = userToUpdate.name;
+            findUser.document = userToUpdate.document;
+            findUser.username = userToUpdate.username;
+            findUser.password = userToUpdate.password;
+
+            localStorage.setItem('userData', JSON.stringify(this.data));
+
+            return {
+                response: 200,
+                data: findUser
+            }
+        } catch (error) {
+            return error
         }
     }
 
