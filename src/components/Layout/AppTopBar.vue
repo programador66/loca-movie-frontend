@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import UserService from '../services/UserService';
+import UserService from '../../services/UserService';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -92,4 +92,4 @@ const items = ref([
   cursor: pointer;
 }
 
-</style>
+</style>../../../services/UserService

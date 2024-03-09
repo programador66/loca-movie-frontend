@@ -159,6 +159,16 @@ const handleRegisterRentMovie = async () => {
     const dataUser = localStorage.getItem('user@session');
     const userSession = dataUser ? JSON.parse(dataUser) : null;
 
+    const validateRentDate = validateForm({
+        date_location: rentMovieForm.value.date_location,
+        date_delivery: rentMovieForm.value.date_delivery,
+    });
+
+    if (!validateRentDate) {
+        toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - check empty  dates to rent`, life: 3000 });
+        return;
+    }
+
     const newRentMovie: IRentMovie = {
         id: uuidv4(),
         date_location: new Date(rentMovieForm.value.date_location),

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
-import AppTopBar from './components/AppTopBar.vue';
-import AppFooter from './components/AppFooter.vue';
+import AppTopBar from './components/Layout/AppTopBar.vue';
+import AppFooter from './components/Layout/AppFooter.vue';
 
 </script>
 
 <template>
-  <div style="padding: 0;">
+  <div>
     <AppTopBar />
       <RouterView />
     <AppFooter />
