@@ -1,18 +1,43 @@
-# Vue 3 + TypeScript + Vite
+<h1 align="center"><img align="center" src="./github_assets/img-01-hom.png" alt="Rent movie system" width="700"></img></h1>
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+# Loca-movie
+O Projeto foi desenvolvido para Locação de filmes com consumo de api do  OMDb (https://www.omdbapi.com/).
 
-## Recommended IDE Setup
+O projeto consiste e Pequeno crud de usuarios, clientes, e aluguel de filmes.
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+# ✋🏻 Pré-requisitos
 
-## Type Support For `.vue` Imports in TS
+- [Node.js](https://nodejs.org/en/) ou 
+- [Docker](https://docs.docker.com/engine/install/ubuntu/)
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+## 🚀  Tecnologias
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+Frontend:
+-   [Vuejs](https://vuejs.org/)
+-   [Axios](https://github.com/axios/axios)
+-   [Tailwindcss](https://tailwindcss.com/)
+-   [PrimeVue](https://primevue.org/)
 
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+
+## Começando
+
+<h1 align="center"><img align="center" src="./github_assets/img-02-rent.png" alt="Rent movie" width="700"></img></h1>
+
+
+## 🔥 Instalação e execução com docker
+
+1. Ter o docker e docker compose instalado
+2. executar o comando `docker-compose up -d` na pasta do projeto
+
+frontend : localhost:5173
+
+usuario: admin
+senha: admin
+
+
+## 🔥 Instalação e execução com npm (Sem Docker)
+
+1. Faça um clone desse repositório;
+2. Entre na pasta cd loca-movie;
+3. Execute `npm install` na pasta frontend para instalar as dependências;
+4. Execute `npm run dev` pra startar o projeto;
