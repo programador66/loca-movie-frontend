@@ -1,5 +1,5 @@
 <template>
-    <Dialog v-bind:visible="openUserModal" modal header="New User" :style="{ width: '28rem' }"
+    <Dialog v-bind:visible="openUserModal" modal  :style="{ width: '28rem' }"
       :breakpoints="{ '800px': '90vw', '575px': '100vw' }" :closable="false">
             <div class="flex flex-col items-center p-5 bg-surface-0 dark:bg-surface-700 rounded-md">
                 <div
@@ -82,7 +82,7 @@ const formData = ref({
 
 watch(data, (newValue) => {
     fillOutForm(newValue);
-});
+}, { deep: true });
 
 const fillOutForm = (data: IUser) => {
     formData.value.id = data.id;

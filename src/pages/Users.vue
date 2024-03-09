@@ -15,7 +15,7 @@
       :isUpdateUser="isUpdateUser"
       @register-new-user="handleRegisterUser"
       @update-user="handleUpdateUser"
-      @close-modal="openUserModal = false"
+      @close-modal="clearFormData"
     />
     <ConfirmPopup></ConfirmPopup>
 
@@ -41,6 +41,7 @@ import { useToast } from "primevue/usetoast";
 import UserService, { IUser } from '../services/UserService';
 import { v4 as uuidv4 } from 'uuid';
 import UserModal from '../components/Modals/UserModal.vue';
+import { validateForm } from '../utils/functions';
 
 onMounted(async () => {
   await getUsers();
@@ -79,6 +80,13 @@ const handleRegisterUser = async (data: any) => {
     createdAt: new Date(),
     updatedAt: new Date(),
   }
+
+  const validate = validateForm(newUser);
+
+  if (!validate) {
+        toast.add({ severity: 'error', summary: 'Rejected', detail: `Register error - check empty fields!`, life: 3000 });
+        return;
+    }
 
   try {
     const userResponse: any = UserService.registerUser(newUser);
@@ -167,16 +175,15 @@ const getUsers = async () => {
 };
 
 const clearFormData = () => {
-  formData.value = {
-    id: '',
-    name: '',
-    document: '',
-    password: '',
-    username: '',
-    status: 'ACTIVE',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
+  
+  formData.value.id = '';
+  formData.value.name = '';
+  formData.value.document = '';
+  formData.value.username = '';
+  formData.value.password = '';
+  formData.value.status = 'ACTIVE';
+  formData.value.createdAt = new Date();
+  formData.value.updatedAt = new Date();
 
   openUserModal.value = false;
   isUpdateUser.value = false;
